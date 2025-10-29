@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://3bgftb3tbvgs"]
+
+[ext_resource type="Script" uid="uid://c173fxiac3eaa" path="res://sounding/testPD.gd" id="1_pukbk"]
+
+[node name="Sounding" type="Node2D"]
+script = ExtResource("1_pukbk")
