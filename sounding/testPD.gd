@@ -14,5 +14,6 @@ func _ready() -> void:
 	player.play()
 	pd = player.get_stream_playback()
 	
-	pd.open_patch("E:/dirs2/gdprojects/an-escape/sounding/example.pd")
+	pd.open_patch("E:/dirs2/gdprojects/an-escape/sounding/pds/example.pd")
 	
+	pd.send_bang("bang")
