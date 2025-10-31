@@ -1,6 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://3bgftb3tbvgs"]
+[gd_scene load_steps=3 format=3 uid="uid://3bgftb3tbvgs"]
 
 [ext_resource type="Script" uid="uid://c173fxiac3eaa" path="res://sounding/testPD.gd" id="1_pukbk"]
+[ext_resource type="PackedScene" uid="uid://2nkapga0kubo" path="res://sounding/ui.tscn" id="2_l0bi8"]
 
 [node name="Sounding" type="Node2D"]
 script = ExtResource("1_pukbk")
+
+[node name="Ui" parent="." instance=ExtResource("2_l0bi8")]
+offset_left = 290.0
+offset_top = 490.0
+offset_right = 290.0
+offset_bottom = 490.0
+
+[editable path="Ui"]
