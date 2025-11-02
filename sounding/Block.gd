@@ -1,6 +1,8 @@
 class_name Block
 extends Node2D
 
+signal  position_changed(block: Block)
+
 var sprite:Sprite2D
 var spriteTexture: CompressedTexture2D = preload("res://textures/Sp1.png"):
 	set(value):
@@ -86,6 +88,7 @@ func _moveBlock(_position: Vector2):
 	
 	noteVelocity = clamp(0.3 + (_position.x / currentScreenSize.x) * 0.6, 0.3, 0.9)
 	noteValue = minNote + (_position.y / currentScreenSize.y) * (maxNote - minNote)
+	position_changed.emit(self)
 
 func getNormalisedPosition()-> Vector2:
 	var screenSize = get_viewport_rect().size

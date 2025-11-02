@@ -22,9 +22,23 @@ const EFFECT_COLORS := {
 	"filter": Color(1.0, 0.8, 0.2, 0.7),
 	"distortion": Color(1.0, 0.2, 0.4, 0.7)
 	}
+	
 
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.is_pressed():
+		for b in blocks:
+			var localPos = b.to_local(event.position)
+			if b.blockRect.has_point(localPos):
+				b.blockColor =_calcBlockColor(b.global_position, b.isPlaying)
+				print("[RIGHT CLICK] Block %d isPlaying: %s" % [b.stepNumber, b.isPlaying])
+				break
+		
 func _ready() -> void:
+	print("=== INITIALIZING SEQUENCER ===")
 	screensize = get_viewport_rect().size
+	print("Screen size: ", screensize)
+	
 	player = AudioStreamPlayer.new()
 	add_child(player)
 	
@@ -35,22 +49,31 @@ func _ready() -> void:
 	pd = player.get_stream_playback()
 	
 	pd.open_patch("E:/dirs2/gdprojects/an-escape/sounding/pds/laurie.pd")
+	print("PD Patch loaded: laurie.pd")
+	
 	btn.pressed.connect(onStartPreesed)
 	bpmSlider.value_changed.connect(onBpmChnaged)
 	
 	pd.send_float("bpm", bpmSlider.value)
 	bpmValLabel.text = str(bpmSlider.value)
+	print("[PD SEND] bpm -> %.2f" % bpmSlider.value)
+	
 	_spawnBlock()
+	_updateAllBlockColors()
+	print("=== INITIALIZATION COMPLETE ===\n")
 	
 
 func onStartPreesed():
+	print("[PD SEND] start -> BANG")
 	pd.send_bang("start")
 
 func onBpmChnaged(value: float):
-		pd.send_float("bpm", value)
-		bpmValLabel.text = str(value)
+	print("[PD SEND] bpm -> %.2f" % value)
+	pd.send_float("bpm", value)
+	bpmValLabel.text = str(value)
 		
 func _spawnBlock():
+	print("\n--- Spawning %d blocks ---" % numBlocks)
 	for b in numBlocks:
 		_creaetBlock(b)
 
@@ -61,8 +84,14 @@ func _creaetBlock(index: int):
 	var note = randi_range(60, 90)
 	block.noteValue = note
 	block.blockColor=_calcBlockColor(block.global_position, false)
+	
+	block.position_changed.connect(_onBlockPosChanged)
+	block.isPlaying=true
+	
 	add_child(block)
 	blocks.append(block)
+	print("Block %d created at position: %s" % [index, block.global_position])
+	_updatePdFromBlock(block)
 
 
 func _calcBlockColor(blockPos: Vector2, isActive: bool) ->Color:
@@ -98,3 +127,43 @@ func _calcBlockColor(blockPos: Vector2, isActive: bool) ->Color:
 func _updateAllBlockColors():
 	for b in blocks:
 		b.blockColor = _calcBlockColor(b.global_position, b.isPlaying)
+
+
+func _updatePdFromBlock(block: Block):
+	var idx := block.stepNumber
+	
+	var normX = clampf(block.global_position.x / screensize.x, 0.0, 1.0)
+	var normY = clampf(block.global_position.y / screensize.y, 0.0, 1.0)
+	
+	print("\n[BLOCK %d UPDATE] Position: (%.1f, %.1f) | Normalized: (%.2f, %.2f)" % [idx, block.global_position.x, block.global_position.y, normX, normY])
+	
+	var steps = int(lerp(4.0, 12.0, normX))
+	pd.send_float("steps" + str(idx), steps)
+	print("  [PD SEND] steps%d -> %d" % [idx, steps])
+	
+	var hits = int(lerp(1.0, 6.0, normY))
+	pd.send_float("hits" + str(idx), hits)
+	print("  [PD SEND] hits%d -> %d" % [idx, hits])
+	
+	var diag = (normX + normY) / 2.0
+	var rot = int(lerp(1.0, 6.0, diag))
+	pd.send_float("rotation" + str(idx), rot)
+	print("  [PD SEND] rotation%d -> %d" % [idx, rot])
+	
+	var atk_time = lerp(1.0, 300.0, normX)
+	pd.send_float("env" + str(idx+1) + "_atk_time", atk_time)
+	print("  [PD SEND] env%d_atk_time -> %.1f" % [idx+1, atk_time])
+	
+	var dcy_time = lerp(100.0, 400.0, normY)
+	pd.send_float("env" + str(idx+1) + "_dcy_time", dcy_time)
+	print("  [PD SEND] env%d_dcy_time -> %.1f" % [idx+1, dcy_time])
+	
+	var filterCutoff = lerp(500.0, 4000.0, diag)
+	pd.send_float("filter" + str(idx+1) + "Cutoff", filterCutoff)
+	print("  [PD SEND] filter%dCutoff -> %.1f" % [idx+1, filterCutoff])
+
+func _onBlockPosChanged(block: Block):
+	print("\n[POSITION CHANGED] Block %d dragged" % block.stepNumber)
+	_updatePdFromBlock(block)
+	block.blockColor = _calcBlockColor(block.global_position, block.isPlaying)
+	
