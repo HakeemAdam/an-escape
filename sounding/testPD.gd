@@ -6,6 +6,7 @@ var pd: AudioStreamPlaybackPD
 @onready var btn := $Ui/VBoxContainer/Button
 @onready var bpmSlider := $Ui/VBoxContainer/bpmSlider
 @onready var bpmValLabel := $Ui/VBoxContainer/bpmValueLabel
+@onready var ui = $Ui 
 
 var blocks: Array[Block]=[]
 var screensize: Vector2
@@ -33,10 +34,13 @@ func _input(event: InputEvent) -> void:
 				b.blockColor =_calcBlockColor(b.global_position, b.isPlaying)
 				print("[RIGHT CLICK] Block %d isPlaying: %s" % [b.stepNumber, b.isPlaying])
 				break
+	if event is InputEventKey and event.keycode == KEY_M and event.is_pressed():
+		ui.visible = !ui.visible
 		
 func _ready() -> void:
 	print("=== INITIALIZING SEQUENCER ===")
 	screensize = get_viewport_rect().size
+	get_viewport().size_changed.connect(_on_viewport_resized)
 	print("Screen size: ", screensize)
 	
 	player = AudioStreamPlayer.new()
@@ -61,7 +65,16 @@ func _ready() -> void:
 	_spawnBlock()
 	_updateAllBlockColors()
 	print("=== INITIALIZATION COMPLETE ===\n")
+
+
+func _process(_delta: float) -> void:
 	
+	if blocks.size() > 0:
+		var mixedColor = Color.BLACK
+		for b in blocks:
+			mixedColor += b.blockColor
+		mixedColor = mixedColor / blocks.size()
+		RenderingServer.set_default_clear_color(mixedColor)	
 
 func onStartPreesed():
 	print("[PD SEND] start -> BANG")
@@ -167,3 +180,7 @@ func _onBlockPosChanged(block: Block):
 	_updatePdFromBlock(block)
 	block.blockColor = _calcBlockColor(block.global_position, block.isPlaying)
 	
+func _on_viewport_resized() -> void:
+	screensize = get_viewport_rect().size
+	print("Viewport resized to: %s" % screensize)
+	_updateAllBlockColors()
