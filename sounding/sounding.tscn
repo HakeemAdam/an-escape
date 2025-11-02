@@ -7,9 +7,12 @@
 script = ExtResource("1_pukbk")
 
 [node name="Ui" parent="." instance=ExtResource("2_l0bi8")]
-offset_left = 290.0
-offset_top = 490.0
-offset_right = 290.0
-offset_bottom = 490.0
+offset_left = 382.0
+offset_top = 322.0
+offset_right = 382.0
+offset_bottom = 322.0
+
+[node name="VolumeSlider" parent="Ui/VBoxContainer" index="7"]
+step = 0.1
 
 [editable path="Ui"]

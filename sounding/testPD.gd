@@ -6,7 +6,10 @@ var pd: AudioStreamPlaybackPD
 @onready var btn := $Ui/VBoxContainer/Button
 @onready var bpmSlider := $Ui/VBoxContainer/bpmSlider
 @onready var bpmValLabel := $Ui/VBoxContainer/bpmValueLabel
-@onready var ui = $Ui 
+@onready var ui := $Ui 
+@onready var delayBtn := $Ui/VBoxContainer/DelayBtn
+@onready var reverbBtn := $Ui/VBoxContainer/ReverbBtn
+@onready var volSlider := $Ui/VBoxContainer/VolumeSlider
 
 var blocks: Array[Block]=[]
 var screensize: Vector2
@@ -23,7 +26,8 @@ const EFFECT_COLORS := {
 	"filter": Color(1.0, 0.8, 0.2, 0.7),
 	"distortion": Color(1.0, 0.2, 0.4, 0.7)
 	}
-	
+var reverb_bus_idx: int = -1
+var delay_bus_idx: int = -1	
 
 
 func _input(event: InputEvent) -> void:
@@ -49,6 +53,11 @@ func _ready() -> void:
 	var stream = AudioStreamPD.new()
 	player.stream = stream
 	
+	_setup_audio_buses()
+	
+	reverbBtn.toggled.connect(_on_reverb_toggled)
+	delayBtn.toggled.connect(_on_delay_toggled)
+	
 	player.play()
 	pd = player.get_stream_playback()
 	
@@ -61,6 +70,10 @@ func _ready() -> void:
 	pd.send_float("bpm", bpmSlider.value)
 	bpmValLabel.text = str(bpmSlider.value)
 	print("[PD SEND] bpm -> %.2f" % bpmSlider.value)
+	
+	volSlider.value_changed.connect(_on_volume_changed)
+	volSlider.value = 1.0  
+	_on_volume_changed(volSlider.value)
 	
 	_spawnBlock()
 	_updateAllBlockColors()
@@ -184,3 +197,64 @@ func _on_viewport_resized() -> void:
 	screensize = get_viewport_rect().size
 	print("Viewport resized to: %s" % screensize)
 	_updateAllBlockColors()
+
+
+func _setup_audio_buses():
+	
+	reverb_bus_idx = AudioServer.bus_count
+	AudioServer.add_bus(reverb_bus_idx)
+	AudioServer.set_bus_name(reverb_bus_idx, "Reverb")
+	var reverb = AudioEffectReverb.new()
+	reverb.room_size = 0.8
+	reverb.damping = 0.5
+	reverb.wet = 0.3
+	AudioServer.add_bus_effect(reverb_bus_idx, reverb)
+	AudioServer.set_bus_send(reverb_bus_idx, "Master")
+	AudioServer.set_bus_mute(reverb_bus_idx, true)  # Start muted
+	
+	# Add delay bus
+	delay_bus_idx = AudioServer.bus_count
+	AudioServer.add_bus(delay_bus_idx)
+	AudioServer.set_bus_name(delay_bus_idx, "Delay")
+	var delay = AudioEffectDelay.new()
+	delay.tap1_active = true
+	delay.tap1_delay_ms = 300.0
+	delay.tap1_level_db = -6.0  # Use tap1_level_db instead (in decibels)
+	delay.tap1_pan = 0.2  # Pan slightly right
+	delay.tap2_active = true
+	delay.tap2_delay_ms = 400.0
+	delay.tap2_level_db = -12.0
+	delay.tap2_pan = -0.2  # Pan slightly left
+	delay.feedback_active = true
+	delay.feedback_delay_ms = 340.0
+	delay.feedback_level_db = -12.0
+	AudioServer.add_bus_effect(delay_bus_idx, delay)
+	AudioServer.set_bus_send(delay_bus_idx, "Master")
+	AudioServer.set_bus_mute(delay_bus_idx, true)  # Start muted
+	
+		# Add effects directly to Master bus
+	AudioServer.add_bus_effect(0, reverb)  # 0 = Master
+	AudioServer.add_bus_effect(0, delay)
+	
+	# Disable by default
+	AudioServer.set_bus_effect_enabled(0, 0, false)  # Reverb off
+	AudioServer.set_bus_effect_enabled(0, 1, false) 
+	
+	# Route audio through these buses
+	player.bus = "Master"
+	
+	print("Audio buses created: Reverb, Delay")
+
+func _on_reverb_toggled(toggled_on: bool):
+	AudioServer.set_bus_effect_enabled(0, 0, toggled_on) 
+	print("[REVERB] %s" % ("ON" if toggled_on else "OFF"))
+
+func _on_delay_toggled(toggled_on: bool):
+	AudioServer.set_bus_effect_enabled(0, 1, toggled_on)
+	print("[DELAY] %s" % ("ON" if toggled_on else "OFF"))
+
+func _on_volume_changed(value: float):
+	
+	var db = linear_to_db(value)
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), db)
+	print("[VOLUME] %.0f%% (%.1f dB)" % [value * 100, db])
