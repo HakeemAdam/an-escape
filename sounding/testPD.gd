@@ -18,13 +18,13 @@ func _ready() -> void:
 	player.play()
 	pd = player.get_stream_playback()
 	
-	pd.open_patch("E:/dirs2/gdprojects/an-escape/sounding/pds/example.pd")
+	pd.open_patch("E:/dirs2/gdprojects/an-escape/sounding/pds/laurie.pd")
 	btn.pressed.connect(onStartPreesed)
 	bpmSlider.value_changed.connect(onBpmChnaged)
 	
 	pd.send_float("bpm", bpmSlider.value)
 	bpmValLabel.text = str(bpmSlider.value)
-	#pd.send_bang("start")
+	
 
 func onStartPreesed():
 	pd.send_bang("start")
