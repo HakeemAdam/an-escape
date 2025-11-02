@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://3bgftb3tbvgs"]
+[gd_scene load_steps=4 format=3 uid="uid://3bgftb3tbvgs"]
 
 [ext_resource type="Script" uid="uid://c173fxiac3eaa" path="res://sounding/testPD.gd" id="1_pukbk"]
 [ext_resource type="PackedScene" uid="uid://2nkapga0kubo" path="res://sounding/ui.tscn" id="2_l0bi8"]
+[ext_resource type="PackedScene" uid="uid://bch7nnbsoyxvd" path="res://sounding/credit.tscn" id="3_by1e0"]
 
 [node name="Sounding" type="Node2D"]
 script = ExtResource("1_pukbk")
@@ -15,7 +16,17 @@ offset_bottom = 322.0
 [node name="bpmSlider" parent="Ui/VBoxContainer" index="2"]
 min_value = 20.0
 
-[node name="VolumeSlider" parent="Ui/VBoxContainer" index="7"]
-step = 0.1
+[node name="Credit" parent="." instance=ExtResource("3_by1e0")]
+
+[node name="Button" type="Button" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_right = 61.0
+offset_bottom = 31.0
+grow_horizontal = 0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "credits"
 
 [editable path="Ui"]

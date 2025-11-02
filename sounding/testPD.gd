@@ -10,6 +10,8 @@ var pd: AudioStreamPlaybackPD
 @onready var delayBtn := $Ui/VBoxContainer/DelayBtn
 @onready var reverbBtn := $Ui/VBoxContainer/ReverbBtn
 @onready var volSlider := $Ui/VBoxContainer/VolumeSlider
+@onready var credit := $Credit
+@onready var creditBtn :=$Button
 
 var blocks: Array[Block]=[]
 var screensize: Vector2
@@ -64,6 +66,7 @@ func _ready() -> void:
 	
 	reverbBtn.toggled.connect(_on_reverb_toggled)
 	delayBtn.toggled.connect(_on_delay_toggled)
+	creditBtn.pressed.connect(_onCreditsClick)
 	
 	player.play()
 	pd = player.get_stream_playback()
@@ -79,11 +82,14 @@ func _ready() -> void:
 	print("[PD SEND] bpm -> %.2f" % bpmSlider.value)
 	
 	volSlider.value_changed.connect(_on_volume_changed)
-	volSlider.value = 1.0  
 	_on_volume_changed(volSlider.value)
+	
+	
 	
 	_spawnBlock()
 	_updateAllBlockColors()
+	
+	credit.visible = false
 	print("=== INITIALIZATION COMPLETE ===\n")
 
 
@@ -265,3 +271,6 @@ func _on_volume_changed(value: float):
 	var db = linear_to_db(value)
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), db)
 	print("[VOLUME] %.0f%% (%.1f dB)" % [value * 100, db])
+
+func _onCreditsClick():
+	credit.visible = !credit.visible
