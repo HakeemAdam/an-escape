@@ -11,9 +11,14 @@ config_version=5
 [application]
 
 config/name="AnEscape"
+run/main_scene="uid://3bgftb3tbvgs"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
 [display]
 
 window/size/viewport_width=1200
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true

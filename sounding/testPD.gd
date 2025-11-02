@@ -35,7 +35,14 @@ func _input(event: InputEvent) -> void:
 		for b in blocks:
 			var localPos = b.to_local(event.position)
 			if b.blockRect.has_point(localPos):
-				b.blockColor =_calcBlockColor(b.global_position, b.isPlaying)
+				b.isPlaying = !b.isPlaying
+				b.blockColor = _calcBlockColor(b.global_position, b.isPlaying)
+				
+				# Send mute state to PD (1 = playing, 0 = muted)
+				var muteValue = 1.0 if b.isPlaying else 0.0
+				pd.send_float("mute" + str(b.stepNumber), muteValue)
+				print("  [PD SEND] mute%d -> %.0f" % [b.stepNumber, muteValue])
+				
 				print("[RIGHT CLICK] Block %d isPlaying: %s" % [b.stepNumber, b.isPlaying])
 				break
 	if event is InputEventKey and event.keycode == KEY_M and event.is_pressed():
