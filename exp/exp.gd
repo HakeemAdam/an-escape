@@ -11,9 +11,18 @@ extends Node2D
 # replace population and reselction - step 2
 
 var randCharArray: Array[String] =[]
+var resultString: Array[String] = ["C", "A", "T"]
+
 func _ready() -> void:
 	genCat()
 	print(randCharArray)
+	searchCat(randCharArray)
+	
+
+func searchCat(_search: Array[String]) -> void:
+	for i in resultString.size():
+		pass
+	pass
 
 func genCat() -> void:
 	for i in 3:
