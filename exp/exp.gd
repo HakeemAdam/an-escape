@@ -21,6 +21,11 @@ func _ready() -> void:
 
 func searchCat(_search: Array[String]) -> void:
 	for i in resultString.size():
+		var test: String = _search[i]
+		if test.containsn(resultString[i]):
+			print(true)
+		else:
+			print(false)
 		pass
 	pass
 
@@ -32,5 +37,5 @@ func genCat() -> void:
 		
 
 func randomChar() -> int:
-	return randi_range(0, 100)
+	return randi_range(65, 122)
 	
