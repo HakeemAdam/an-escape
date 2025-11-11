@@ -9,3 +9,19 @@ extends Node2D
 	# mutation - modify the childs dna by probabiliyt
 	# add new child to the new population 
 # replace population and reselction - step 2
+
+var randCharArray: Array[String] =[]
+func _ready() -> void:
+	genCat()
+	print(randCharArray)
+
+func genCat() -> void:
+	for i in 3:
+		var ranChar :int = randomChar()
+		var res : String = String.chr(ranChar)
+		randCharArray.push_back(res)
+		
+
+func randomChar() -> int:
+	return randi_range(0, 100)
+	
