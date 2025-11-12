@@ -10,30 +10,37 @@ extends Node2D
 	# add new child to the new population 
 # replace population and reselction - step 2
 
-var randCharArray: Array[String] =[]
+
 var resultString: Array[String] = ["C", "A", "T"]
+var attempts: int =0
+const MaxAttempts: int = 10000
 
 func _ready() -> void:
 	genCat()
-	print(randCharArray)
-	searchCat(randCharArray)
+	searchCat()
 	
 
-func searchCat(_search: Array[String]) -> void:
-	for i in resultString.size():
-		var test: String = _search[i]
-		if test.containsn(resultString[i]):
-			print(true)
-		else:
-			print(false)
-		pass
-	pass
+func searchCat() -> void:
+	while attempts < MaxAttempts:
+		attempts += 1
+		var randCharArray: Array[String] = genCat()
+		
+		if randCharArray[0] == "C" and randCharArray[1] == "A" and randCharArray[2] == "T":
+			print("Found cat after ", attempts, " Attempts!")
+			print(randCharArray)
+			break
+		if attempts % 1000 == 0:
+			print("Attempts ", attempts, ": ", randCharArray)
+		if attempts >=MaxAttempts:
+			print("Gave up after ", MaxAttempts, " attempts")
 
-func genCat() -> void:
+func genCat() -> Array[String]:
+	var chars: Array[String] =[]
 	for i in 3:
-		var ranChar :int = randomChar()
+		var ranChar :int = randi_range(65, 90)
 		var res : String = String.chr(ranChar)
-		randCharArray.push_back(res)
+		chars.push_back(res)
+	return chars
 		
 
 func randomChar() -> int:
