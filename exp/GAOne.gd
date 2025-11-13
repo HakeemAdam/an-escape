@@ -6,36 +6,38 @@ var totalPop: int = 100
 var elements: Array[Ind]=[]
 var matingPool: Array[Ind]=[]
 
+var btn: Button
+var canvas: CanvasLayer
+
 func _ready() -> void:
 	screenSize = get_viewport_rect().size
+	canvas = CanvasLayer.new()
+	canvas.layer = 100
+		
+	btn = Button.new()
+	btn.global_position = Vector2(0, 200)
+	btn.text = "reproduce"
+	add_child(canvas)
+	canvas.add_child(btn)
+	
+	btn.pressed.connect(onrepPressed)
+	
 	initPop()
 	SelectMatingPool()
 	print("mating pool Size:", matingPool.size())
-	
-	
 	pass 
 
 
 
 func _process(_delta: float) -> void:
-
+	#for i in 10:
+		#onrepPressed()
 	queue_redraw()
 	pass
 
 func initPop() -> void:
 	for i in totalPop:
-		var el = preload("res://exp/ind.gd").new()
-		
-		var pos = Vector2(randf_range(0.0, screenSize.x-el.IRadius),randf_range(0.0, screenSize.y-el.IRadius))
-		el.IPos=pos;
-		
-		var dna = randi_range(i,255) / 255.0
-		el.Idna = dna
-		print("DNA: ", dna)
-		
-		var col = dna 
-		el.IColor = Color(col, col, col, 1.0)
-		
+		var el = addInd()
 		add_child(el)
 		elements.push_back(el)
 		
@@ -50,9 +52,42 @@ func SelectMatingPool() -> void:
 	pass
 	
 func evalFitness(element: float) -> int:
-	if element > 0.15 :
+	if element > 0.25 :
 		return 3
-	elif element > 0.25:
+	elif element > 0.15:
 		return 2
 	else:
 		return 1
+
+
+func reproduce():
+	for i in totalPop:
+		var ParentA = matingPool.pick_random()
+		var ParentB = matingPool.pick_random()
+		
+		var childColor = lerp(ParentA.IColor, ParentB.IColor,1.0)
+		var childDNA = lerp(ParentA.Idna, ParentB.Idna, 0.5)
+		var newChild = addInd()
+		newChild.Idna = childDNA
+		newChild.IColor=childColor
+		add_child(newChild)
+
+func addInd() -> Ind:
+	var el = preload("res://exp/ind.gd").new()
+	var pos = Vector2(randf_range(0.0, screenSize.x-el.IRadius),randf_range(0.0, screenSize.y-el.IRadius))
+	el.IPos=pos
+		
+	var dna = randi_range(0,255) / 255.0
+	el.Idna = dna
+	print("DNA: ", dna)
+		
+	var col = dna 
+	el.IColor = Color(col, col, col, 1.0)
+	
+	return el
+
+func onrepPressed():
+	reproduce()
+	SelectMatingPool()
+	print("mating pool Size:", matingPool.size())
+	
