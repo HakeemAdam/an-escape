@@ -2,7 +2,10 @@
 extends Node2D
 
 var screenSize: Vector2
-var totalPop: int = 100
+var totalPop: int = 100:
+	set(value):
+		totalPop=value
+		
 var mutationRate: float = 0.1
 var elements: Array[Ind]=[]
 var matingPool: Array[Ind]=[]
@@ -62,19 +65,33 @@ func evalFitness(element: float) -> int:
 
 
 func reproduce():
+	var newGen: Array[Ind]=[]
+	# error here 
 	for i in totalPop:
 		var ParentA = matingPool.pick_random()
 		var ParentB = matingPool.pick_random()
 		
 		var childColor = lerp(ParentA.IColor, ParentB.IColor,1.0)
 		var childDNA = lerp(ParentA.Idna, ParentB.Idna, 0.5)
+		
 		var newChild = addInd()
 		newChild.Idna = childDNA
 		newChild.IColor=childColor
+		
 		if (randf_range(0,1) < mutationRate ):
 			newChild.IColor = Color.YELLOW_GREEN
 			print("mutation")
 		add_child(newChild)
+		newGen.push_back(newChild)
+		
+	for el in elements:
+		if el.IFitness ==1:
+			remove_child(el)
+			queue_free()
+			
+	elements= newGen
+	totalPop=elements.size() 
+			
 
 func addInd() -> Ind:
 	var el = preload("res://exp/ind.gd").new()
@@ -93,5 +110,6 @@ func addInd() -> Ind:
 func onrepPressed():
 	reproduce()
 	SelectMatingPool()
-	print("mating pool Size:", matingPool.size())
+	print("Mating pool Size:", matingPool.size())
+	print("Population Size:", totalPop)
 	
