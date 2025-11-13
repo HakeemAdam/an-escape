@@ -16,7 +16,6 @@ var attempts: int =0
 const MaxAttempts: int = 10000
 
 func _ready() -> void:
-	genCat()
 	searchCat()
 	
 
