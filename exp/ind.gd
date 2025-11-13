@@ -10,6 +10,10 @@ var Idna: int = 25:
 	set(value):
 		Idna = value
 
+var IFitness: int = 0:
+	set(value):
+		IFitness = value
+		
 var IPos: Vector2 = Vector2.ZERO:
 	set(value):
 		IPos=value
@@ -19,11 +23,10 @@ var IRadius: float = 20:
 		IRadius = value
 
 func _ready() -> void:
-	pass # Replace with function body.
+	pass 
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	queue_redraw()
 	pass
 	
