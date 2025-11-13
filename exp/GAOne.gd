@@ -3,6 +3,7 @@ extends Node2D
 
 var screenSize: Vector2
 var totalPop: int = 100
+var mutationRate: float = 0.1
 var elements: Array[Ind]=[]
 var matingPool: Array[Ind]=[]
 
@@ -70,6 +71,9 @@ func reproduce():
 		var newChild = addInd()
 		newChild.Idna = childDNA
 		newChild.IColor=childColor
+		if (randf_range(0,1) < mutationRate ):
+			newChild.IColor = Color.YELLOW_GREEN
+			print("mutation")
 		add_child(newChild)
 
 func addInd() -> Ind:
@@ -79,7 +83,7 @@ func addInd() -> Ind:
 		
 	var dna = randi_range(0,255) / 255.0
 	el.Idna = dna
-	print("DNA: ", dna)
+	#print("DNA: ", dna)
 		
 	var col = dna 
 	el.IColor = Color(col, col, col, 1.0)
